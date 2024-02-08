@@ -1,0 +1,7 @@
+{
+	"name": "Horrific Housing",
+	"description": "A funny mod that make your game act like horrific housing!!",
+	"restart": true,
+	"runsGlobally": true,
+	"color": [170, 0, 255]
+}
