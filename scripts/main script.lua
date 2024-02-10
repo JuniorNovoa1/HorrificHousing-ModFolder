@@ -12,7 +12,8 @@ local eventList = {
 	[7] = 'invinsible',
 	[8] = 'rebirth',
 	[9] = 'frozen',
-	[10] = 'random notespeed'
+	[10] = 'random notespeed',
+	[11] = 'darkness'
 }
 local eventListTxt = {
 	['note spinning'] = "Somebody's notes will start spinning!",
@@ -24,13 +25,14 @@ local eventListTxt = {
 	['invinsible'] = "Somebody is invinsible!",
 	['rebirth'] = "Somebody will receive one rebirth!",
 	['frozen'] = "Somebody is frozen!",
-	['random notespeed'] = "Every notes's speed will be randomized!"
+	['random notespeed'] = "Every notes's speed will be randomized!",
+	['darkness'] = "Everyone's screen will go dark (use the flashlight!)"
 }
 
 --event vars
-local eventLastingTimer = 5;
-local eventEndingTimer = 10; --timer after string to trigger event over
-local textStringTimer = 5;
+local eventLastingTimer = 5; --delay before events
+local eventEndingTimer = 15; --how long events last
+local textStringTimer = 5; --how long before event text dissapears
 
 local canNoteSpin = false;
 local poisoned = false;
@@ -103,6 +105,8 @@ function onCreatePost()
 end
 
 local elapsedtime = 0.0;
+local flashLightPower = 100;
+local flashLightOn = false;
 function onUpdate(elapsed)
     elapsedtime = elapsedtime +elapsed;
 
@@ -171,6 +175,15 @@ function onUpdate(elapsed)
 			end 
 		end
 	end
+	if eventList[eventNum] == "darkness" then
+		setProperty("darknessLight.x", getMouseX("other"))
+		setProperty("darknessLight.y", getMouseY("other"))
+		if mouseClicked("left") then flashLightOn = not flashLightOn end
+		setProperty("darknessLight.visible", flashLightOn)
+		if flashLightOn and flashLightPower ~= 0 then flashLightPower = flashLightPower - (elapsed * (eventEndingTimer / 1.005)) end
+		if math.floor(flashLightPower) < 0 then flashLightPower = 0; doTweenAlpha("darknessLight", "darknessLight", 0, 1, "") end
+		setTextString("flashlightPower", "Flashlight Power: "..math.floor(flashLightPower).."%")
+	end
 end
 
 function goodNoteHit(membersIndex, noteData, noteType, isSustainNote)
@@ -185,7 +198,7 @@ function activateEvent()
 	eventNum = getRandomInt(1, #eventList);
 	randomPlayerEvent = getRandomInt(1, 2)
 	if bfOnlyTargeted then randomPlayerEvent = 2; end
-	--eventNum = 5;
+	--eventNum = 11;
 	runTimer("horrificHousingEventEnd", eventEndingTimer / playbackRate)
 	runTimer("horrificHousingEventTxt", textStringTimer / playbackRate)
 	setTextString("robloxBlackBarTxt", eventListTxt[eventList[eventNum]])
@@ -266,6 +279,36 @@ function activateEvent()
 			setPropertyFromGroup("unspawnNotes", i, "multSpeed", getRandomFloat(getPropertyFromGroup("unspawnNotes", i, "multSpeed") - (scrollSpeedAmount), getPropertyFromGroup("unspawnNotes", i, "multSpeed")))
 		end
 	end
+	if eventList[eventNum] == "darkness" then
+		makeLuaSprite('darknessFlashLight', '', 0, 0)
+		makeGraphic('darknessFlashLight', '1280', '720', '000000')
+		setProperty('darknessFlashLight.alpha', 0)
+		setObjectCamera("darknessFlashLight", "other")
+		updateHitbox("darknessFlashLight")
+		screenCenter("darknessFlashLight", 'xy')
+		addLuaSprite('darknessFlashLight', true)
+		doTweenAlpha("darknessFlashLight", "darknessFlashLight", 0.935, 3, "")
+
+		makeLuaSprite("darknessLight", "light", getMouseX("other"), getMouseY("other"))
+		setObjectCamera("darknessLight", 'other')
+		setBlendMode("darknessLight", 'add')
+		scaleObject("darknessLight", 2.35, 2.35, true)
+		addLuaSprite("darknessLight", false)
+		setObjectOrder("darknessLight", getObjectOrder("darknessFlashLight") + 1)
+
+		makeLuaText('flashlightPower', "Flashlight Power: "..flashLightPower, 0, 4, getProperty('healthBar.y') + 30)
+		setObjectCamera('flashlightPower', 'other')
+		setTextAlignment('flashlightPower', 'left')
+		setTextSize('flashlightPower', 24)
+		setTextBorder('flashlightPower', 1.5, '000000')
+		updateHitbox('flashlightPower')
+		addLuaText('flashlightPower')
+		setProperty("flashlightPower.alpha", 0)
+		doTweenAlpha("flashlightPower", "flashlightPower", 1, 2.5, "")
+
+		flashLightOn = false;
+		flashLightPower = 100;
+	end
 end
 
 function skipEvent()
@@ -342,8 +385,16 @@ function resetEvents()
 			setPropertyFromGroup("unspawnNotes", i, "multSpeed", 1)
 		end
 	end
+	if eventList[eventNum] == "darkness" then
+		doTweenAlpha("darknessFade", "darknessFlashLight", 0, 1, "")
+		removeLuaSprite("darknessLight", true)
+		removeLuaText("flashlightPower", true)
+	end
 end
 
+function onTweenCompleted(tag)
+	if tag == 'darknessFade' then removeLuaSprite("darknessFlashLight", true) end
+end
 function onTimerCompleted(tag, loops, loopsLeft)
 	if tag == "horrificHousingEvent" then 
 		activateEvent() 
