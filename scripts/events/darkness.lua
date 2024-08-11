@@ -1,4 +1,5 @@
-local eventEnabled = false
+local eventEnabled = false;
+
 local eventName = ""
 local eventNumb = 0;
 local eventTime = 0;
