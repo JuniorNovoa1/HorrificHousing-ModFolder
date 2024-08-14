@@ -17,7 +17,7 @@ function onUpdate(elapsed)
 	if not eventEnabled then return; end
     elapsedtime = elapsedtime +elapsed;
 
-	if player == 2 then setProperty("health", 0.001) else setProperty("health", 1.999) end
+	if player == 2 then runHaxeCode([[setVar("dadHealth", 2);]]) else setProperty("health", 2) end
 end
 
 function activateEvent(evName, evNum, evT, evP)

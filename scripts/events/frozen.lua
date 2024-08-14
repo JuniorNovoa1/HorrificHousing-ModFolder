@@ -29,7 +29,7 @@ function onUpdate(elapsed)
 	if player == 2 then
 		for i = 0, getProperty("notes.length") do		
 			if (getSongPosition() > (getProperty("noteKillOffset") - 10) + getPropertyFromGroup("notes", i, "strumTime")) and not getPropertyFromGroup("notes", i, "mustPress") then
-				setProperty("health", getProperty("health") + getPropertyFromGroup("notes", i, "missHealth"))
+				runHaxeCode([[setVar("healthDad", getVar("healthDad") - ]]..getPropertyFromGroup("notes", i, "missHealth")..[[);]])
 				setProperty("vocals.volume", 0)
 				--playSound("missnote"..getRandomInt(1, 3))
 				removeFromGroup("notes", i, false)

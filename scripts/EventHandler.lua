@@ -1,5 +1,6 @@
 --Settings:
-local isBFTargeted = false; --Should Boyfriend be the only one affected by events? (true / false)
+isBFTargeted = false; --Should Boyfriend be the only one affected by events? (true / false)
+endWhenOpponentHealthGoesToZero = false; -- (true / false) (DOES NOT WORK RIGHT NOW!))))
 
 local eventLength = 15; --How long should events last? (in seconds)
 local eventDelay = 5; --How long before another event happens? (in seconds)
@@ -7,23 +8,24 @@ local textStringTimer = 5; --How long should text stay on screen after event des
 
 --events
 local eventNum = 0;
-local eventList = { --[0] = {name='', desc="", customTimer=nil}
-	[1] = {name='note spinning', desc="Somebody's notes will start spinning!", customTimer=nil},
-	[2] = {name='note alpha', desc="Somebody's notes will be transparent!", customTimer=nil},
-	[3] = {name='poison', desc="Somebody will be poisoned!", customTimer=nil},
-	[4] = {name='flash bang', desc="Somebody will be flashed!", customTimer=5},
-	[5] = {name='random scrollspeed', desc="The scroll speed will be random!", customTimer=nil},
-	[6] = {name='random notespeed', desc="Every notes's speed will be randomized!", customTimer=nil},
-	[7] = {name='snow', desc="Heavy Snowfall will start, sing to remain warm!", customTimer=nil},
-	[8] = {name='invinsible', desc="Somebody is invinsible!", customTimer=nil},
-	[9] = {name='rebirth', desc="Somebody will receive one rebirth!", customTimer=5},
-	[10] = {name='frozen', desc="Somebody is frozen!", customTimer=nil},
-	[11] = {name='darkness', desc="Everyone's screen will go dark (use the flashlight!)", customTimer=nil},
-	[12] = {name='corruption', desc="Somebody's game didn't properly load!", customTimer=nil},
-	[13] = {name='jumpscare', desc="AHHHHHHHHHHHHHHHHHH", customTimer=5}
+local eventList = { --{name='', desc="", customTimer=nil}
+	{name='note spinning', desc="Somebody's notes will start spinning!", customTimer=nil},
+	{name='note alpha', desc="Somebody's notes will be transparent!", customTimer=nil},
+	{name='poison', desc="Somebody will be poisoned!", customTimer=nil},
+	{name='flash bang', desc="Somebody will be sent a flash bang!", customTimer=5},
+	{name='random scrollspeed', desc="The scroll speed will be random!", customTimer=nil},
+	{name='random notespeed', desc="Every notes's speed will be randomized!", customTimer=nil},
+	{name='snow', desc="Heavy Snowfall will start, sing to remain warm!", customTimer=nil},
+	{name='invinsible', desc="Somebody is invinsible!", customTimer=nil},
+	{name='rebirth', desc="Somebody will receive one rebirth!", customTimer=5},
+	{name='frozen', desc="Somebody will be frozen!", customTimer=nil},
+	--{name='darkness', desc="Everyone's screen will go dark (use the flashlight!)", customTimer=nil},
+	--{name='flash beacon', desc="Everyone's screen will go dark (use the flash beacon!)", customTimer=nil},
+	{name='corruption', desc="Somebody's game didn't properly load!", customTimer=nil},
+	--{name='jumpscare', desc="AHHHHHHHHHHHHHHHHHH", customTimer=5}
 }
 --debug
-local forcedEvent = 0; --0 = disabled
+local forcedEvent = 7; --0 = disabled
 
 local randomPlayerEvent = 0;
 
@@ -44,26 +46,6 @@ end
 local oldFPS = 60;
 local overrideFPS = 60;
 function onCreatePost()
-	if isBFTargeted then setHealth(2) end
-
-	if not downscroll then
-		setProperty("robloxBlackBar.y", getProperty("robloxBlackBar.y") + 32)
-		setProperty("robloxBlackBarTxt.y", getProperty("robloxBlackBar.y") + 14)
-		setProperty("timeBar.y", getProperty("timeBar.y") - 16) -- + 25
-		setProperty("timeTxt.y", getProperty("timeTxt.y") - 16)
-		for i = 0, getProperty("strumLineNotes.length") do
-			setPropertyFromGroup("strumLineNotes", i, "y", getPropertyFromGroup("strumLineNotes", i, "y") + 25)
-		end
-	else
-		setProperty("robloxBlackBar.y", getProperty("timeBar.y") - 32)
-		setProperty("robloxBlackBarTxt.y", getProperty("robloxBlackBar.y") + 14)
-		setProperty("timeBar.y", getProperty("timeBar.y") + 16) -- + 25
-		setProperty("timeTxt.y", getProperty("timeTxt.y") + 16)
-		for i = 0, getProperty("strumLineNotes.length") do
-			setPropertyFromGroup("strumLineNotes", i, "y", getPropertyFromGroup("strumLineNotes", i, "y") - 25)
-		end
-	end
-	
 	if stringStartsWith(version, '0.6') then oldFPS = getPropertyFromClass("ClientPrefs", "framerate") else oldFPS = getPropertyFromClass("backend.ClientPrefs", "data.framerate") end
 	runHaxeCode([[
 		var framerate = ]]..overrideFPS..[[;

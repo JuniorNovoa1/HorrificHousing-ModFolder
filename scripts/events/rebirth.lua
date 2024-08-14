@@ -17,26 +17,26 @@ function onUpdate(elapsed)
 	if not eventEnabled then return; end
     elapsedtime = elapsedtime +elapsed;
 
-	if rebirth[1] then
-		if getProperty("health") >= 2 then
-			setProperty("health", 0.1)
-			playAnim("boyfriend", "hurt")
-			playSound("bird-caw", 1)
-			if flashingLights then
-				cameraFlash("other", "FFA500", 1.2 / playbackRate)
-			end
-			rebirth[1] = false;
-		end
-	end
 	if rebirth[2] then
-		if getProperty("health") <= 0 then
-			setProperty("health", 2)
-			playAnim("boyfriend", "hey")
+		if getProperty("healthDad") <= 0 then
+			runHaxeCode([[setVar("healthDad", 2);]])
+			--playAnim("boyfriend", "hurt")
 			playSound("bird-caw", 1)
 			if flashingLights then
 				cameraFlash("other", "FFA500", 1.2 / playbackRate)
 			end
 			rebirth[2] = false;
+		end
+	end
+	if rebirth[1] then
+		if getProperty("health") <= 0 then
+			setProperty("health", 2)
+			--playAnim("boyfriend", "hey")
+			playSound("bird-caw", 1)
+			if flashingLights then
+				cameraFlash("other", "FFA500", 1.2 / playbackRate)
+			end
+			rebirth[1] = false;
 		end
 	end
 end

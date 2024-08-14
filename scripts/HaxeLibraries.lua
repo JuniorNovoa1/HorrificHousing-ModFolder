@@ -5,4 +5,5 @@ function onCreate()
 	addHaxeLibrary("FlxEase", 'flixel.tweens')
 	addHaxeLibrary("AttachedSprite")
 	addHaxeLibrary("Std")
+	addHaxeLibrary("Paths")
 end

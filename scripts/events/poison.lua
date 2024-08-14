@@ -10,14 +10,14 @@ local randomChar = {"boyfriend", "dad"}
 local randomStrum = {"playerStrums", "opponentStrums"}
 
 --event script variables
-local healthDrain = 0.0012;
+local healthDrain = 0.002;
 
 local elapsedtime = 0.0;
 function onUpdate(elapsed)
 	if not eventEnabled then return; end
     elapsedtime = elapsedtime +elapsed;
 
-	if player == 1 then setProperty("health", getProperty("health") - healthDrain) else setProperty("health", getProperty("health") + healthDrain) end
+	if player == 1 then setProperty("health", getProperty("health") - healthDrain) else runHaxeCode([[setVar("healthDad", getVar("healthDad") - ]]..healthDrain..[[);]]) end
 end
 
 function activateEvent(evName, evNum, evT, evP)
