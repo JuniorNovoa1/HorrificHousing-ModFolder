@@ -21,31 +21,20 @@ local eventList = { --{name='', desc="", customTimer=nil}
 	{name='frozen', desc="Somebody will be frozen!", customTimer=nil},
 	--{name='darkness', desc="Everyone's screen will go dark (use the flashlight!)", customTimer=nil},
 	--{name='flash beacon', desc="Everyone's screen will go dark (use the flash beacon!)", customTimer=nil},
-	{name='corruption', desc="Somebody's game didn't properly load!", customTimer=nil},
+	{name='corruption', desc="Somebody's game didn't properly load!", customTimer=nil}
 	--{name='jumpscare', desc="AHHHHHHHHHHHHHHHHHH", customTimer=5}
 }
 --debug
-local forcedEvent = 7; --0 = disabled
+local forcedEvent = 0; --0 = disabled
 
 local randomPlayerEvent = 0;
 
-function onSongStart()
-	runTimer("horrificHousingEvent", eventDelay)
-
-	--[[makeLuaSprite("iceCubeHorrific", "icecube", getProperty("boyfriend.x"), getProperty("boyfriend.y"))
-	setGraphicSize("iceCubeHorrific", getProperty("boyfriend.width") * 1.35, getProperty("boyfriend.height") * 1.35, true)
-	setProperty("iceCubeHorrific.x", getProperty("boyfriend.x") - (getProperty("boyfriend.width") / 6))
-	setProperty("iceCubeHorrific.y", getProperty("boyfriend.y") - (getProperty("boyfriend.height") / 5.5))
-	setProperty("iceCubeHorrific.color", getColorFromHex("00FFEF"))
-	--screenCenter("iceCubeHorrific", 'xy')
-	setProperty("iceCubeHorrific.alpha", 1)
-	addLuaSprite("iceCubeHorrific", true)
-	setProperty("iceCubeHorrific.visible", true)--]] --ugly ass image that i made
-end
 
 local oldFPS = 60;
 local overrideFPS = 60;
-function onCreatePost()
+function onSongStart()
+	runTimer("horrificHousingEvent", eventDelay)
+
 	if stringStartsWith(version, '0.6') then oldFPS = getPropertyFromClass("ClientPrefs", "framerate") else oldFPS = getPropertyFromClass("backend.ClientPrefs", "data.framerate") end
 	runHaxeCode([[
 		var framerate = ]]..overrideFPS..[[;
@@ -107,17 +96,11 @@ function resetEvents()
 end
 
 function onTimerCompleted(tag, loops, loopsLeft)
-	if tag == "horrificHousingEvent" then 
-		activateEvent() 
-	end
+	if tag == "horrificHousingEvent" then activateEvent() end
 
-	if tag == "horrificHousingEventTxt" then 
-		setTextString("robloxBlackBarTxt", "")
-	end
+	if tag == "horrificHousingEventTxt" then setTextString("robloxBlackBarTxt", "") end
 
-	if tag == "horrificHousingEventEnd" then
-		resetEvents() 
-	end
+	if tag == "horrificHousingEventEnd" then resetEvents() end
 end
 
 function onDestroy()
