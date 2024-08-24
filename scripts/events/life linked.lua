@@ -10,24 +10,26 @@ local randomChar = {"boyfriend", "dad"}
 local randomStrum = {"playerStrums", "opponentStrums"}
 
 --event script variables
-local previousHealth = 1;
+local lifelinked = false;
 
 local elapsedtime = 0.0;
 function onUpdate(elapsed)
 	if not eventEnabled then return; end
     elapsedtime = elapsedtime +elapsed;
 
-	if player == 2 then runHaxeCode([[setVar("dadHealth", ]]..previousHealth..[[);]]) else setHealth(previousHealth) end
+	if (getHealth() <= 0 or getProperty("dadHealth") <= 0) and lifelinked then
+		setHealth(0)
+	end
 end
 
 function activateEvent(evName, evNum, evT, evP)
 	eventName = evName; eventNum = evNum; eventTime = evT; player = evP;
 
-	if player == 1 then previousHealth = getHealth() elseif player == 2 then previousHealth = getProperty("dadHealth") end
-
+	lifelinked = true;
+	
 	eventEnabled = true;
 end
-function deactivateEvent()
-	eventEnabled = false;
-	removeLuaScript("scripts/events/"..eventName) --removes event
+function deactivateEvent() --this event should stay enabled!
+	--[[eventEnabled = false;
+	removeLuaScript("scripts/events/"..eventName) --removes event --]]
 end

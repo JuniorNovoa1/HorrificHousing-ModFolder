@@ -14,24 +14,38 @@ local shaderObjects = {""}
 local binaryIntensity = 1000.0;
 local negativity = 0.0;
 local strumPositions = {};
-local oldcharname = "";
 
 local elapsedtime = 0.0;
 function onUpdate(elapsed)
 	if not eventEnabled then return; end
     elapsedtime = elapsedtime +elapsed;
+	negativity = negativity - (elapsed * 10);
+	if negativity < 0 then negativity = 0.0; end
 
 	for i = 1, #shaderObjects do
 		setShaderFloat(shaderObjects[i], 'binaryIntensity', binaryIntensity)
 		setShaderFloat(shaderObjects[i], 'negativity', negativity)
 	end
+
+	local songPosition = getPropertyFromClass("Conductor", "songPosition")
+    local firstEventNoteStrumTime = getProperty("eventNotes[0].strumTime") - 10 --2.75
+
+    if songPosition > firstEventNoteStrumTime and getProperty("eventNotes[0].event") == "change character" then
+        if getProperty("eventNotes[0].value1") == "bf" then
+			removeSpriteShader("boyfriend")
+		end
+		if getProperty("eventNotes[0].value1") == "dad" then
+			removeSpriteShader("dad")
+		end
+    end
 end
 function onStepHit()
 	binaryIntensity = getRandomFloat(4, 6);
 end
 function onBeatHit()
 	if not eventEnabled then return; end
-	for i = 0, getProperty("notes.length") do
+		--disable this shit for performance reasons.
+	--[[for i = 0, getProperty("notes.length") do
 		if player == 1 and getPropertyFromGroup("notes", i, "mustPress") then
 			table.insert(shaderObjects, "notes.members["..i.."]")
 			setSpriteShader("notes.members["..i.."]", "Distortion")
@@ -39,7 +53,7 @@ function onBeatHit()
 			table.insert(shaderObjects, "notes.members["..i.."]")
 			setSpriteShader("notes.members["..i.."]", "Distortion")
 		end
-	end
+	end--]]
 end
 function goodNoteHit(index, noteDir, noteType, isSustainNote)
 	if not eventEnabled then return; end
@@ -55,23 +69,14 @@ function opponentNoteHit(index, noteDir, noteType, isSustainNote)
 		setPropertyFromGroup("opponentStrums", noteDir, "y", strumPositions[noteDir+1][2] + getRandomInt(1, 8))
 	end
 end
+
 function onEvent(eventName, value1, value2)
 	if eventName == "Change Character" then
 		if value1 == "bf" and player == 1 then
-			runHaxeCode([[
-				var char = game.boyfriendMap.get("]]..oldcharname..[[");
-				char.alpha = 0.00001;
-				char.shader = null;
-			]])
-			oldcharname = value2;
+			setSpriteShader("boyfriend", "Distortion")
 		end
 		if value1 == "dad" and player == 2 then
-			runHaxeCode([[
-				var char = game.dadMap.get("]]..oldcharname..[[");
-				char.alpha = 0.00001;
-				char.shader = null;
-			]])
-			oldcharname = value2;
+			setSpriteShader("dad", "Distortion")
 		end
 	end
 end
@@ -84,10 +89,8 @@ function activateEvent(evName, evNum, evT, evP)
 	if player == 2 then
 		table.insert(shaderObjects, "iconP2")
 		table.insert(shaderObjects, "dad")
-		oldcharname = dadName;
 	else
-		shaderObjects = {"robloxBlackBar", "robloxBlackBarTxt", "timeTxt", "scoreTxt", "healthBarBG", "iconP1", "boyfriend"}
-		oldcharname = boyfriendName;
+		shaderObjects = {"robloxBlackBar", "robloxBlackBarTxt", "timeTxt", "scoreTxt", "iconP1", "boyfriend",  "coloredlogo", "chatOff", "moreOff"}
 	end
 	for i = 0, getProperty(randomStrum[player]..".length") do
 		table.insert(shaderObjects, randomStrum[player]..".members["..i.."]")

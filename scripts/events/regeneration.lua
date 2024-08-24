@@ -10,24 +10,37 @@ local randomChar = {"boyfriend", "dad"}
 local randomStrum = {"playerStrums", "opponentStrums"}
 
 --event script variables
-local previousHealth = 1;
+local healthGain = 0.002;
 
 local elapsedtime = 0.0;
 function onUpdate(elapsed)
 	if not eventEnabled then return; end
     elapsedtime = elapsedtime +elapsed;
 
-	if player == 2 then runHaxeCode([[setVar("dadHealth", ]]..previousHealth..[[);]]) else setHealth(previousHealth) end
+	if player == 1 then setProperty("health", getProperty("health") + healthGain) else runHaxeCode([[setVar("healthDad", getVar("healthDad") + ]]..healthGain..[[);]]) end
 end
 
 function activateEvent(evName, evNum, evT, evP)
 	eventName = evName; eventNum = evNum; eventTime = evT; player = evP;
 
-	if player == 1 then previousHealth = getHealth() elseif player == 2 then previousHealth = getProperty("dadHealth") end
+	if player == 2 then
+		setProperty("iconP2.color", getColorFromHex("32cd32"))
+	else
+		setProperty("iconP1.color", getColorFromHex("32cd32"))
+	end
+	setProperty(randomChar[player]..".color", getColorFromHex("32cd32"))
 
 	eventEnabled = true;
 end
 function deactivateEvent()
 	eventEnabled = false;
+
+	if player == 2 then
+		setProperty("iconP2.color", getColorFromHex("FFFFFF"))
+	else
+		setProperty("iconP1.color", getColorFromHex("FFFFFF"))
+	end
+	setProperty(randomChar[player]..".color", getColorFromHex("FFFFFF"))
+
 	removeLuaScript("scripts/events/"..eventName) --removes event
 end

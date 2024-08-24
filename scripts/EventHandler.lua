@@ -1,8 +1,11 @@
 --Settings:
+gamemodes = {'normal', 'fast' --[[RANDOM]]}
+gamemode = 'normal' --How should the game act? (optioins are above!!!)
 isBFTargeted = false; --Should Boyfriend be the only one affected by events? (true / false)
+opponentNoteMissChance = 10; --Chance for Opponent to miss a note (0-100)
 endWhenOpponentHealthGoesToZero = false; -- (true / false) (DOES NOT WORK RIGHT NOW!))))
 
-local eventLength = 15; --How long should events last? (in seconds)
+local eventLength = 10; --How long should events last? (in seconds)
 local eventDelay = 5; --How long before another event happens? (in seconds)
 local textStringTimer = 5; --How long should text stay on screen after event description is shown? (in seconds)
 
@@ -12,6 +15,7 @@ local eventList = { --{name='', desc="", customTimer=nil}
 	{name='note spinning', desc="Somebody's notes will start spinning!", customTimer=nil},
 	{name='note alpha', desc="Somebody's notes will be transparent!", customTimer=nil},
 	{name='poison', desc="Somebody will be poisoned!", customTimer=nil},
+	{name='regeneration', desc="Somebody will gain regeneration!", customTimer=nil},
 	{name='flash bang', desc="Somebody will be sent a flash bang!", customTimer=5},
 	{name='random scrollspeed', desc="The scroll speed will be random!", customTimer=nil},
 	{name='random notespeed', desc="Every notes's speed will be randomized!", customTimer=nil},
@@ -19,21 +23,40 @@ local eventList = { --{name='', desc="", customTimer=nil}
 	{name='invinsible', desc="Somebody is invinsible!", customTimer=nil},
 	{name='rebirth', desc="Somebody will receive one rebirth!", customTimer=5},
 	{name='frozen', desc="Somebody will be frozen!", customTimer=nil},
+	{name='strum swap', desc="Two player's notes will swap positions!", customTimer=nil},
+	{name='position swap', desc="Two players will swap positions!", customTimer=nil},
+	{name='1 hp', desc="Someone will play 1hp on their own", customTimer=0.001},
+	{name='wide', desc="Somebody is wide", customTimer=0.001},
+	{name='life linked', desc="2 players are life linked", customTimer=0.001},
 	--{name='darkness', desc="Everyone's screen will go dark (use the flashlight!)", customTimer=nil},
 	--{name='flash beacon', desc="Everyone's screen will go dark (use the flash beacon!)", customTimer=nil},
 	{name='corruption', desc="Somebody's game didn't properly load!", customTimer=nil}
 	--{name='jumpscare', desc="AHHHHHHHHHHHHHHHHHH", customTimer=5}
 }
+local randomPlayerEvent = 0;
 --debug
 local forcedEvent = 0; --0 = disabled
 
-local randomPlayerEvent = 0;
-
-
+function onCreatePost()
+	if string.lower(gamemode) == "random" then
+		gamemode = gamemodes[math.random(1, #gamemodes)]
+	end
+	if string.lower(gamemode) == "" or string.lower(gamemode) == "normal" then
+		local eventLength = 10; --How long should events last? (in seconds)
+		local eventDelay = 5; --How long before another event happens? (in seconds)
+	end
+	if string.lower(gamemode) == "fast" then
+		local eventLength = 5; --How long should events last? (in seconds)
+		local eventDelay = 0; --How long before another event happens? (in seconds)
+	end
+	for i = 0, getProperty("unspawnNotes.length") do
+		if getRandomBool(opponentNoteMissChance) and not getPropertyFromGroup("unspawnNotes", i, "mustPress") and not getPropertyFromGroup("unspawnNotes", i, "isSustainNote") then setPropertyFromGroup("unspawnNotes", i, "ignoreNote", true) end
+	end
+end
 local oldFPS = 60;
 local overrideFPS = 60;
 function onSongStart()
-	runTimer("horrificHousingEvent", eventDelay)
+	runTimer("horrificHousingEvent", eventDelay / playbackRate)
 
 	if stringStartsWith(version, '0.6') then oldFPS = getPropertyFromClass("ClientPrefs", "framerate") else oldFPS = getPropertyFromClass("backend.ClientPrefs", "data.framerate") end
 	runHaxeCode([[
@@ -47,6 +70,16 @@ function onSongStart()
 		}
 	]])
 end
+function onUpdate(elapsed)
+	for i = 0, getProperty("notes.length") do		
+		if (getSongPosition() > (getProperty("noteKillOffset") - 10) + getPropertyFromGroup("notes", i, "strumTime")) and not getPropertyFromGroup("notes", i, "mustPress") then
+			runHaxeCode([[setVar("healthDad", getVar("healthDad") - ]]..getPropertyFromGroup("notes", i, "missHealth")..[[);]])
+			--setProperty("vocals.volume", 0) --not enjoyable
+			--playSound("missnote"..getRandomInt(1, 3))
+			removeFromGroup("notes", i, false)
+		end
+	end
+end
 
 function activateEvent()
 	eventNum = getRandomInt(1, #eventList);
@@ -58,14 +91,7 @@ function activateEvent()
 	
 	randomPlayerEvent = getRandomInt(1, 2)
 	if isBFTargeted then randomPlayerEvent = 1; end
-	if eventTimer ~= nil then
-		eventTimer = eventTimer / playbackRate;
-		runTimer("horrificHousingEventEnd", eventTimer)
-	else
-		eventTimer = eventLength / playbackRate;
-		runTimer("horrificHousingEventEnd", eventTimer)
-	end
-	runTimer("horrificHousingEventTxt", textStringTimer / playbackRate)
+	if eventTimer ~= nil then eventTimer = eventTimer / playbackRate; else eventTimer = eventLength / playbackRate; end
 	if eventDescription ~= nil then
 		setTextString("robloxBlackBarTxt", eventDescription)
 	else
@@ -82,11 +108,15 @@ function activateEvent()
 		updateHitbox("robloxBlackBarTxt")
 		screenCenter("robloxBlackBarTxt", 'x')
 		skipEvent()
+		return;
 	end
+
+	runTimer("horrificHousingEventEnd", eventTimer)
+	runTimer("horrificHousingEventTxt", textStringTimer / playbackRate)
 end
 
 function skipEvent()
-	runTimer("horrificHousingEventEnd", textStringTimer / playbackRate)
+	runTimer("horrificHousingEventEnd", eventDelay / playbackRate)
 	runTimer("horrificHousingEventTxt", textStringTimer / playbackRate)
 end
 

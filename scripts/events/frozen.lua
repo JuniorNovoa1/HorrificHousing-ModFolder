@@ -27,14 +27,8 @@ function onUpdate(elapsed)
 		}
 	]])
 	if player == 2 then
-		for i = 0, getProperty("notes.length") do		
-			if (getSongPosition() > (getProperty("noteKillOffset") - 10) + getPropertyFromGroup("notes", i, "strumTime")) and not getPropertyFromGroup("notes", i, "mustPress") then
-				runHaxeCode([[setVar("healthDad", getVar("healthDad") - ]]..getPropertyFromGroup("notes", i, "missHealth")..[[);]])
-				setProperty("vocals.volume", 0)
-				--playSound("missnote"..getRandomInt(1, 3))
-				removeFromGroup("notes", i, false)
-			end
-			setPropertyFromGroup("notes", i, "hitByOpponent", true)
+		for i = 0, getProperty("notes.length") do
+			setPropertyFromGroup("notes", i, "ignoreNote", true)
 		end
 	elseif player == 1 then
 		for i = 0, getProperty("notes.length") do
@@ -64,7 +58,7 @@ function deactivateEvent()
 	end
 	if player == 2 then
 		for i = 0, getProperty("notes.length") do
-			setPropertyFromGroup("notes", i, "hitByOpponent", false)
+			setPropertyFromGroup("notes", i, "ignoreNote", false)
 		end
 	elseif player == 1 then
 		for i = 0, getProperty("notes.length") do

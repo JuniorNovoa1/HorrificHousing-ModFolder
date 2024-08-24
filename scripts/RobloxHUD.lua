@@ -99,12 +99,13 @@ end
 
 function onUpdatePost(elapsed)
 	runHaxeCode([[
-		if (getVar("healthDad") > 2)
+		var healthDad = getVar("healthDad");
+		if (healthDad > 2)
 			setVar("healthDad", 2);
-		if (getVar("healthDad") < 0)
+		if (healthDad < 0)
 			setVar("healthDad", 0);
 
-		getVar("dadHealthBar").value = getVar("healthDad");
+		getVar("dadHealthBar").value = healthDad;
 		
 		game.iconP1.x = getVar("bfHealthBarBG").x + 80;
 		game.iconP1.y = getVar("bfHealthBarBG").y - 100;

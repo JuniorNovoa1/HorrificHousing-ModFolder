@@ -10,21 +10,26 @@ local randomChar = {"boyfriend", "dad"}
 local randomStrum = {"playerStrums", "opponentStrums"}
 
 --event script variables
-local previousHealth = 1;
+local charPos = {}
 
 local elapsedtime = 0.0;
 function onUpdate(elapsed)
 	if not eventEnabled then return; end
     elapsedtime = elapsedtime +elapsed;
-
-	if player == 2 then runHaxeCode([[setVar("dadHealth", ]]..previousHealth..[[);]]) else setHealth(previousHealth) end
 end
 
 function activateEvent(evName, evNum, evT, evP)
 	eventName = evName; eventNum = evNum; eventTime = evT; player = evP;
 
-	if player == 1 then previousHealth = getHealth() elseif player == 2 then previousHealth = getProperty("dadHealth") end
+	table.insert(charPos, {getProperty("dad.x"), getProperty("dad.y")})
+	table.insert(charPos, {getProperty("boyfriend.x"), getProperty("boyfriend.y")})
 
+	for i = 1, 2 do
+		setCharacterX(randomChar[i], charPos[i][1])
+		--setCharacterY(randomChar[i], charPos[i][2])
+		--setProperty(randomChar[i]..".flipX", not getProperty(randomChar[i]..".flipX"))
+	end
+	
 	eventEnabled = true;
 end
 function deactivateEvent()
