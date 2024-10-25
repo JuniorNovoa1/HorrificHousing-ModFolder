@@ -6,4 +6,6 @@ function onCreate()
 	addHaxeLibrary("AttachedSprite")
 	addHaxeLibrary("Std")
 	addHaxeLibrary("Paths")
+	addHaxeLibrary("lime")
+	addHaxeLibrary("Application", "lime.app")
 end

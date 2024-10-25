@@ -11,10 +11,9 @@ local randomStrum = {"playerStrums", "opponentStrums"}
 
 --event script variables
 local snowDrainLimit = 2 / 3;
-local snowDrainRate = 0.2;
+local snowDrainRate = 0.0002;
 local snowDrainBF = 0;
 local snowDrainDAD = 0;
-local constantMultiplier = 0.00001;
 
 function math.clamp(x,min,max)return math.max(min,math.min(x,max))end
 function math.lerp(from, to, t)
@@ -24,21 +23,23 @@ end
 local elapsedtime = 0.0;
 function onUpdate(elapsed)	--TO GET PERCENTAGE: math.floor(((snowDrain * 240) / snowDrainLimit) * 100)
 	if not eventEnabled then return; end
-    elapsedtime = elapsedtime +elapsed;
-
-	snowDrainBF = snowDrainBF + ((snowDrainRate * constantMultiplier) * playbackRate);
-	snowDrainDAD = snowDrainDAD + ((snowDrainRate * constantMultiplier) * playbackRate);
-	if snowDrainBF < 0 then snowDrainBF = 0; end
-	if snowDrainDAD < 0 then snowDrainDAD = 0; end
-	--if snowDrainBF >= snowDrainLimit --[[stupid fnf health system]] then snowDrainBF = 0.5 * constantMultiplier end
-	--if snowDrainDAD >= snowDrainLimit --[[stupid fnf health system]] then snowDrainDAD = 0.5 * constantMultiplier end
-	print("dad drain: "..snowDrainDAD)
-	setHealth(getProperty("health") - snowDrainBF)
-	runHaxeCode([[setVar("healthDad", getVar("healthDad") - ]]..snowDrainDAD..[[);]])
-
-	setProperty("snowFallingVG.alpha", math.lerp(getProperty("snowFallingVG.alpha"), (snowDrainBF * 250) / snowDrainLimit, 0.77))
+    elapsedtime = elapsedtime +elapsed; 
 end
-local drainRateMult = snowDrainRate * 0.0004;
+function onTimerCompleted(tag, loops, loopsLeft)
+	if tag == "0.1" then
+		snowDrainBF = snowDrainBF + (snowDrainRate * playbackRate);
+		snowDrainDAD = snowDrainDAD + (snowDrainRate * playbackRate);
+		if snowDrainBF < 0 then snowDrainBF = 0; end
+		if snowDrainDAD < 0 then snowDrainDAD = 0; end
+		if snowDrainBF >= snowDrainLimit then snowDrainBF = snowDrainLimit end
+		if snowDrainDAD >= snowDrainLimit then snowDrainDAD = snowDrainLimit end
+		setHealth(getProperty("health") - snowDrainBF)
+		runHaxeCode([[setVar("healthDad", getVar("healthDad") - ]]..snowDrainDAD..[[);]])
+	
+		setProperty("snowFallingVG.alpha", math.lerp(getProperty("snowFallingVG.alpha"), (snowDrainBF * 10) / snowDrainLimit, 0.77))
+	end
+end
+local drainRateMult = snowDrainRate / 2;
 function goodNoteHit(membersIndex, noteData, noteType, isSustainNote)
 	if not isSustainNote then snowDrainBF = snowDrainBF - (drainRateMult * playbackRate); else snowDrainBF = snowDrainBF - ((drainRateMult / 3) * playbackRate); end
 end

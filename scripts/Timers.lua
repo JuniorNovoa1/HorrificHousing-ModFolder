@@ -1,0 +1,10 @@
+function onSongStart()
+	loops = 1000000; --(yes)
+	runTimer("0.1", 0.1, loops)
+	runTimer("0.5", 0.5, loops)
+	runTimer("1", 1, loops)
+	runTimer("2", 2, loops)
+	runTimer("5", 5, loops)
+	runTimer("10", 10, loops)
+	runTimer("20", 20, loops)
+end

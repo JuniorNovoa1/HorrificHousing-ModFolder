@@ -93,6 +93,27 @@ function onCreatePost()
 		end
 	end
 end
+
+local regenCheck = {true, true}
+local prevHealth = {2, 2}
+function onTimerCompleted(tag)
+	if tag == "1" and regenCheck[1] then
+		setHealth(getHealth() + (2 * 0.01))
+	end
+	if tag == "1" and regenCheck[2] then
+		runHaxeCode([[setVar("healthDad", getVar("healthDad") + ]]..(2 * 0.01)..[[);]])
+	end
+	if tag == "1" then
+		if prevHealth[1] == getHealth() then
+			regenCheck[1] = true;
+		elseif prevHealth[1] ~= getHealth() then
+			regenCheck[1] = false;
+		end
+
+		prevHealth[1] = getHealth()
+		prevHealth[2] = getVar("healthDad")
+	end
+end
 function opponentNoteHit(index, noteDir, noteType, isSustainNote)
 	runHaxeCode([[setVar("healthDad", getVar("healthDad") + ]]..getPropertyFromGroup("notes", index, "hitHealth")..[[);]])
 end

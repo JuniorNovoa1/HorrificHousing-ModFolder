@@ -1,6 +1,6 @@
 --Settings:
-gamemodes = {'normal', 'fast' --[[RANDOM]]}
-gamemode = 'normal' --How should the game act? (optioins are above!!!)
+gamemodes = {'normal', 'fast', 'random'}
+gamemode = 'normal' --How should the game act? (options are above!!!)
 isBFTargeted = false; --Should Boyfriend be the only one affected by events? (true / false)
 opponentNoteMissChance = 10; --Chance for Opponent to miss a note (0-100)
 endWhenOpponentHealthGoesToZero = false; -- (true / false) (DOES NOT WORK RIGHT NOW!))))
@@ -14,6 +14,7 @@ local eventNum = 0;
 local eventList = { --{name='', desc="", customTimer=nil}
 	{name='note spinning', desc="Somebody's notes will start spinning!", customTimer=nil},
 	{name='note alpha', desc="Somebody's notes will be transparent!", customTimer=nil},
+	{name='note scale', desc="Somebody's notes will change size!", customTimer=nil},
 	{name='poison', desc="Somebody will be poisoned!", customTimer=nil},
 	{name='regeneration', desc="Somebody will gain regeneration!", customTimer=nil},
 	{name='flash bang', desc="Somebody will be sent a flash bang!", customTimer=5},
@@ -24,13 +25,18 @@ local eventList = { --{name='', desc="", customTimer=nil}
 	{name='rebirth', desc="Somebody will receive one rebirth!", customTimer=5},
 	{name='frozen', desc="Somebody will be frozen!", customTimer=nil},
 	{name='strum swap', desc="Two player's notes will swap positions!", customTimer=nil},
-	{name='position swap', desc="Two players will swap positions!", customTimer=nil},
-	{name='1 hp', desc="Someone will play 1hp on their own", customTimer=0.001},
+	{name='shuffle', desc="Shuffle: All players will swap positions", customTimer=5},
+	{name='1 hp', desc="Someone will play 1 hp on their own", customTimer=0.001},
 	{name='wide', desc="Somebody is wide", customTimer=0.001},
 	{name='life linked', desc="2 players are life linked", customTimer=0.001},
 	--{name='darkness', desc="Everyone's screen will go dark (use the flashlight!)", customTimer=nil},
 	--{name='flash beacon', desc="Everyone's screen will go dark (use the flash beacon!)", customTimer=nil},
-	{name='corruption', desc="Somebody's game didn't properly load!", customTimer=nil}
+	{name='corruption', desc="Somebody's game didn't properly load!", customTimer=nil},
+	{name='window movement', desc="Someone's game will start moving!", customTimer=nil},
+	{name='half health', desc="A player will lose half their halth", customTimer=0.001}
+	--{name='heart attack', desc="Somebody will have a heart attack!", customTimer=nil}
+	--{name='', desc="", customTimer=nil}
+	--{name='random strumnote', desc="Someone will receive another strum note", customTimer=nil}
 	--{name='jumpscare', desc="AHHHHHHHHHHHHHHHHHH", customTimer=5}
 }
 local randomPlayerEvent = 0;
@@ -39,15 +45,15 @@ local forcedEvent = 0; --0 = disabled
 
 function onCreatePost()
 	if string.lower(gamemode) == "random" then
-		gamemode = gamemodes[math.random(1, #gamemodes)]
+		gamemode = gamemodes[getRandomInt(1, #gamemodes, ""..#gamemodes)]
 	end
 	if string.lower(gamemode) == "" or string.lower(gamemode) == "normal" then
-		local eventLength = 10; --How long should events last? (in seconds)
-		local eventDelay = 5; --How long before another event happens? (in seconds)
+		eventLength = 10; --How long should events last? (in seconds)
+		eventDelay = 5; --How long before another event happens? (in seconds)
 	end
 	if string.lower(gamemode) == "fast" then
-		local eventLength = 5; --How long should events last? (in seconds)
-		local eventDelay = 0; --How long before another event happens? (in seconds)
+		eventLength = 5; --How long should events last? (in seconds)
+		eventDelay = 0; --How long before another event happens? (in seconds)
 	end
 	for i = 0, getProperty("unspawnNotes.length") do
 		if getRandomBool(opponentNoteMissChance) and not getPropertyFromGroup("unspawnNotes", i, "mustPress") and not getPropertyFromGroup("unspawnNotes", i, "isSustainNote") then setPropertyFromGroup("unspawnNotes", i, "ignoreNote", true) end
@@ -124,7 +130,6 @@ function resetEvents()
 	callScript("scripts/events/"..eventList[eventNum]["name"], "deactivateEvent")
 	runTimer("horrificHousingEvent", eventDelay / playbackRate)
 end
-
 function onTimerCompleted(tag, loops, loopsLeft)
 	if tag == "horrificHousingEvent" then activateEvent() end
 
